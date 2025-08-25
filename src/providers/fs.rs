@@ -392,13 +392,11 @@ impl HistoryStore for FsHistoryStore {
         let mut max_eid = 0u64;
         if let Ok(mut rd) = fs::read_dir(&inst_dir).await {
             while let Ok(Some(ent)) = rd.next_entry().await {
-                if let Some(name) = ent.file_name().to_str() {
-                    if let Some(stem) = name.strip_suffix(".jsonl") {
-                        if let Ok(id) = stem.parse::<u64>() {
+                if let Some(name) = ent.file_name().to_str()
+                    && let Some(stem) = name.strip_suffix(".jsonl")
+                        && let Ok(id) = stem.parse::<u64>() {
                             max_eid = max_eid.max(id);
                         }
-                    }
-                }
             }
         }
         if max_eid == 0 { None } else { Some(max_eid) }

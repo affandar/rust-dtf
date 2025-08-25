@@ -287,12 +287,11 @@ impl Runtime {
         F: FnOnce(String) -> OrchestratorMsg,
     {
         // Validate execution ID first (if provided)
-        if let Some(execution_id) = exec_id_check {
-            if !self.validate_completion_execution_id(instance, execution_id).await {
+        if let Some(execution_id) = exec_id_check
+            && !self.validate_completion_execution_id(instance, execution_id).await {
                 let _ = self.history_store.ack(QueueKind::Orchestrator, &token).await;
                 return;
             }
-        }
 
         // Ensure instance is active; if dehydrated, rehydrate and abandon for redelivery
         if !self.router.inboxes.lock().await.contains_key(instance) {
@@ -325,8 +324,8 @@ impl Runtime {
     /// Returns true if valid, false if should be ignored (with warning logged).
     async fn validate_completion_execution_id(&self, instance: &str, completion_execution_id: u64) -> bool {
         let current_execution_ids = self.current_execution_ids.lock().await;
-        if let Some(&current_id) = current_execution_ids.get(instance) {
-            if completion_execution_id != current_id {
+        if let Some(&current_id) = current_execution_ids.get(instance)
+            && completion_execution_id != current_id {
                 if completion_execution_id < current_id {
                     warn!(
                         instance = %instance,
@@ -344,7 +343,6 @@ impl Runtime {
                 }
                 return false;
             }
-        }
         true
     }
 
@@ -923,13 +921,11 @@ impl Runtime {
         if let Some(ver_str) = history.iter().rev().find_map(|e| match e {
             Event::OrchestrationStarted { name: n, version, .. } if n == orchestration_name => Some(version.clone()),
             _ => None,
-        }) {
-            if ver_str != "0.0.0" {
-                if let Ok(v) = semver::Version::parse(&ver_str) {
+        })
+            && ver_str != "0.0.0"
+                && let Ok(v) = semver::Version::parse(&ver_str) {
                     self.pinned_versions.lock().await.insert(instance.to_string(), v);
                 }
-            }
-        }
         let mut comp_rx = self.router.register(instance).await;
 
         // Rehydrate pending activities and timers from history
@@ -946,15 +942,13 @@ impl Runtime {
                 parent_id,
                 ..
             } = e
-            {
-                if n == orchestration_name {
+                && n == orchestration_name {
                     current_input = input.clone();
                     if let (Some(pinst), Some(pid)) = (parent_instance.clone(), *parent_id) {
                         parent_link = Some((pinst, pid));
                     }
                     break;
                 }
-            }
         }
 
         // Resolve handler now, preferring pinned version from history
@@ -1086,8 +1080,8 @@ impl Runtime {
                 } else {
                     Vec::new()
                 };
-                if !deltas.is_empty() {
-                    if let Err(e) = self.history_store.append(instance, deltas.clone()).await {
+                if !deltas.is_empty()
+                    && let Err(e) = self.history_store.append(instance, deltas.clone()).await {
                         error!(instance, turn_index, error=%e, "failed to append final turn events");
                         // Wake any waiters with error to avoid hangs
                         if let Some(waiters) = self.result_waiters.lock().await.remove(instance) {
@@ -1097,7 +1091,6 @@ impl Runtime {
                         }
                         panic!("history append failed: {e}");
                     }
-                }
                 // Exactly-once dispatch for detached orchestration starts recorded in this turn:
                 // enqueue provider work-items; poller will perform the idempotent start.
                 for e in deltas {
@@ -1354,8 +1347,8 @@ impl Runtime {
 
             // Validate that each newly appended completion correlates to a start event of the same kind.
             // If a completion's correlation id points to a different kind of start (or none), classify as nondeterministic.
-            if !last_appended_completions.is_empty() {
-                if let Some(err) = detect::detect_completion_kind_mismatch(
+            if !last_appended_completions.is_empty()
+                && let Some(err) = detect::detect_completion_kind_mismatch(
                     &history[..len_before_completions],
                     &last_appended_completions,
                 ) {
@@ -1371,7 +1364,6 @@ impl Runtime {
                     }
                     return (history, Err(err));
                 }
-            }
 
             if appended_any {
                 turn_index = turn_index.saturating_add(1);

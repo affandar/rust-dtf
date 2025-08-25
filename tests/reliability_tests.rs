@@ -178,12 +178,11 @@ async fn activity_duplicate_completion_workitems_dedup_fs() {
         let hist = store.read(inst).await;
         let mut t_id = 0u64;
         for e in hist.iter() {
-            if let Event::ActivityScheduled { id, name, .. } = e {
-                if name == "SlowEcho" {
+            if let Event::ActivityScheduled { id, name, .. } = e
+                && name == "SlowEcho" {
                     t_id = *id;
                     break;
                 }
-            }
         }
         t_id
     };

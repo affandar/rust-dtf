@@ -80,7 +80,7 @@ async fn select2_two_externals_history_order_wins_fs() {
 
     let acts2 = ActivityRegistry::builder().build();
     let reg2 = OrchestrationRegistry::builder()
-        .register("ABSelect2", move |ctx, s| orchestrator(ctx, s))
+        .register("ABSelect2", orchestrator)
         .build();
     let rt2 = runtime::Runtime::start_with_store(store.clone(), StdArc::new(acts2), reg2).await;
 
@@ -185,7 +185,7 @@ async fn select_two_externals_history_order_wins_fs() {
 
     let acts2 = ActivityRegistry::builder().build();
     let reg2 = OrchestrationRegistry::builder()
-        .register("ABSelect", move |ctx, s| orchestrator(ctx, s))
+        .register("ABSelect", orchestrator)
         .build();
     let rt2 = runtime::Runtime::start_with_store(store.clone(), StdArc::new(acts2), reg2).await;
 
@@ -291,7 +291,7 @@ async fn select_three_mixed_history_winner_fs() {
 
     let acts2 = ActivityRegistry::builder().build();
     let reg2 = OrchestrationRegistry::builder()
-        .register("ATBSelect", move |ctx, s| orchestrator(ctx, s))
+        .register("ATBSelect", orchestrator)
         .build();
     let rt2 = runtime::Runtime::start_with_store(store.clone(), StdArc::new(acts2), reg2).await;
 
@@ -399,7 +399,7 @@ async fn join_returns_history_order_fs() {
 
     let acts2 = ActivityRegistry::builder().build();
     let reg2 = OrchestrationRegistry::builder()
-        .register("JoinAB", move |ctx, s| orchestrator(ctx, s))
+        .register("JoinAB", orchestrator)
         .build();
     let rt2 = runtime::Runtime::start_with_store(store.clone(), StdArc::new(acts2), reg2).await;
 

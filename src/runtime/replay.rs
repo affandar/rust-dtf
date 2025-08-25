@@ -26,6 +26,12 @@ pub trait ReplayEngine: Send + Sync {
 
 pub struct DefaultReplayEngine;
 
+impl Default for DefaultReplayEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DefaultReplayEngine {
     pub fn new() -> Self {
         Self

@@ -468,9 +468,7 @@ impl DurableFuture {
     }
 
     /// Await an external event decoded to a typed value.
-    pub fn into_event_typed<T: serde::de::DeserializeOwned>(self) -> impl Future<Output = T> {
-        async move { crate::_typed_codec::Json::decode::<T>(&Self::into_event(self).await).expect("decode") }
-    }
+    pub async fn into_event_typed<T: serde::de::DeserializeOwned>(self) -> T { crate::_typed_codec::Json::decode::<T>(&Self::into_event(self).await).expect("decode") }
 
     /// Converts this unified future into a future that resolves only for
     /// a sub-orchestration completion or failure.
@@ -494,14 +492,12 @@ impl DurableFuture {
     }
 
     /// Await a sub-orchestration result decoded to a typed value.
-    pub fn into_sub_orchestration_typed<Out: serde::de::DeserializeOwned>(
+    pub async fn into_sub_orchestration_typed<Out: serde::de::DeserializeOwned>(
         self,
-    ) -> impl Future<Output = Result<Out, String>> {
-        async move {
-            match Self::into_sub_orchestration(self).await {
-                Ok(s) => crate::_typed_codec::Json::decode::<Out>(&s),
-                Err(e) => Err(e),
-            }
+    ) -> Result<Out, String> {
+        match Self::into_sub_orchestration(self).await {
+            Ok(s) => crate::_typed_codec::Json::decode::<Out>(&s),
+            Err(e) => Err(e),
         }
     }
 }
@@ -987,7 +983,8 @@ where
     ctx.set_turn_index(turn_index);
     ctx.inner.lock().unwrap().logging_enabled_this_poll = false;
     let mut fut = orchestrator(ctx.clone());
-    let res = match poll_once(&mut fut) {
+    
+    match poll_once(&mut fut) {
         Poll::Ready(out) => {
             ctx.inner.lock().unwrap().logging_enabled_this_poll = true;
             let logs = ctx.take_log_buffer();
@@ -1003,8 +1000,7 @@ where
             let claims = ctx.claimed_ids_snapshot();
             (hist_after, actions, logs, None, claims)
         }
-    };
-    res
+    }
 }
 
 /// Helper for single-threaded, host-driven execution in tests and samples.

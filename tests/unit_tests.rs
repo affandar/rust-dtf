@@ -236,7 +236,7 @@ async fn orchestration_descriptor_root_and_child() {
     // Child descriptor
     let dchild = rt.get_orchestration_descriptor("inst-desc::sub::1").await.unwrap();
     assert_eq!(dchild.name, "ChildDsc");
-    assert!(dchild.version.len() > 0);
+    assert!(!dchild.version.is_empty());
     assert_eq!(dchild.parent_instance.as_deref(), Some("inst-desc"));
     assert_eq!(dchild.parent_id, Some(1));
     rt.shutdown().await;

@@ -140,14 +140,13 @@ impl OrchestrationRegistryBuilder {
                 .push(format!("duplicate orchestration registration: {}@{}", name, v));
             return self;
         }
-        if let Some((latest, _)) = entry.iter().next_back() {
-            if &v <= latest {
+        if let Some((latest, _)) = entry.iter().next_back()
+            && &v <= latest {
                 panic!(
                     "non-monotonic orchestration version for {}: {} is not later than existing latest {}",
                     name, v, latest
                 );
             }
-        }
         entry.insert(v, Arc::new(FnOrchestration(f)));
         self
     }

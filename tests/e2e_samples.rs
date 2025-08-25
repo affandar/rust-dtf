@@ -227,8 +227,7 @@ async fn sample_timeout_with_timer_race_fs() {
         .register("TimeoutSample", orchestration)
         .build();
 
-    let rt =
-        runtime::Runtime::start_with_store(store, Arc::new(activity_registry), orchestration_registry).await;
+    let rt = runtime::Runtime::start_with_store(store, Arc::new(activity_registry), orchestration_registry).await;
     let handle = rt
         .clone()
         .start_orchestration("inst-timeout-sample", "TimeoutSample", "")

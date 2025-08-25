@@ -1,4 +1,4 @@
-use futures::future::{Either, join3, select};
+use futures::future::join3;
 use rust_dtf::providers::HistoryStore;
 use rust_dtf::providers::fs::FsHistoryStore;
 use rust_dtf::runtime::registry::ActivityRegistry;
